@@ -13,6 +13,7 @@ import Shop from "./pages/Shop";
 import Nutrizionisti from "./pages/Nutrizionisti";
 import Staff from "./pages/Staff";
 import Impostazioni from "./pages/Impostazioni";
+import PortaleClienti from "./pages/PortaleClienti";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
                     <Route path="/planning" element={<Planning />} />
                     <Route path="/esercizi" element={<Esercizi />} />
                     <Route path="/nutrizione" element={<Nutrizione />} />
+                    <Route path="/portale-clienti" element={<PortaleClienti />} />
                     <Route path="/shop" element={<Shop />} />
                     <Route path="/nutrizionisti" element={<Nutrizionisti />} />
                     <Route path="/staff" element={<Staff />} />

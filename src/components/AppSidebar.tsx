@@ -27,6 +27,7 @@ const menuItems = [
   { title: "Planning", url: "/planning", icon: Calendar },
   { title: "Esercizi", url: "/esercizi", icon: Dumbbell },
   { title: "Nutrizione", url: "/nutrizione", icon: Apple },
+  { title: "Portale Clienti", url: "/portale-clienti", icon: Users },
 ];
 
 const shopItems = [
