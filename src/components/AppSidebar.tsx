@@ -52,7 +52,7 @@ export function AppSidebar() {
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive 
       ? "bg-primary text-primary-foreground font-medium" 
-      : "hover:bg-muted/50 transition-smooth text-foreground";
+      : "hover:bg-muted/50 transition-smooth text-gray-900 dark:text-gray-100";
 
   return (
     <Sidebar
@@ -76,7 +76,7 @@ export function AppSidebar() {
 
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground">Principale</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-600 text-sm font-medium uppercase tracking-wide">Principale</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -95,7 +95,7 @@ export function AppSidebar() {
 
         {/* Shop Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground">Shop</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-600 text-sm font-medium uppercase tracking-wide">Shop</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {shopItems.map((item) => (
@@ -114,7 +114,7 @@ export function AppSidebar() {
 
         {/* Services Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground">Servizi</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-600 text-sm font-medium uppercase tracking-wide">Servizi</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {serviceItems.map((item) => (
@@ -133,7 +133,7 @@ export function AppSidebar() {
 
         {/* Admin Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground">Amministrazione</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-600 text-sm font-medium uppercase tracking-wide">Amministrazione</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {adminItems.map((item) => (
