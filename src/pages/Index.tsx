@@ -1,4 +1,3 @@
-import Navbar from "@/components/Navbar";
 import DashboardCard from "@/components/DashboardCard";
 import StatsCard from "@/components/StatsCard";
 import { 
@@ -9,24 +8,25 @@ import {
   TrendingUp,
   Clock,
   Target,
-  Award
+  Award,
+  ShoppingCart,
+  Phone
 } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-full bg-background">
       
       {/* Hero Section */}
-      <section className="bg-fitness-gradient text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-fitness-gradient text-white py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4">
               Gestione Completa
               <br />
               <span className="text-white/90">Personal Training</span>
             </h1>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
               La piattaforma professionale per gestire clienti, programmi di allenamento,
               piani nutrizionali e il tuo team di personal trainer.
             </p>
@@ -34,7 +34,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatsCard
@@ -68,11 +68,11 @@ const Index = () => {
         </div>
 
         {/* Main Features */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
             Gestisci la Tua Attività
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <DashboardCard
               title="Planning Settimanale"
               description="Organizza e gestisci tutti gli allenamenti della settimana per i tuoi clienti"
@@ -94,12 +94,22 @@ const Index = () => {
               description="Amministra il tuo team di personal trainer e le loro autorizzazioni"
               icon={Users}
             />
+            <DashboardCard
+              title="Shop Proteine"
+              description="Acquista proteine, barrette e integratori per i tuoi clienti"
+              icon={ShoppingCart}
+            />
+            <DashboardCard
+              title="Nutrizionisti"
+              description="Contatta i nostri nutrizionisti specializzati e convenzionati"
+              icon={Phone}
+            />
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="bg-muted/30 rounded-lg p-8">
-          <h3 className="text-2xl font-bold text-foreground mb-6">
+          <h3 className="text-xl font-bold text-foreground mb-4">
             Azioni Rapide
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
