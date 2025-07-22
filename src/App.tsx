@@ -17,22 +17,22 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <SidebarProvider>
-          <div className="min-h-screen flex w-full">
-            <AppSidebar />
-            <div className="flex-1 flex flex-col">
-              <header className="h-12 flex items-center border-b border-border bg-background sticky top-0 z-40">
-                <SidebarTrigger className="ml-4" />
-                <h1 className="ml-4 font-semibold text-foreground">Dashboard Personal Trainer</h1>
-              </header>
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
+            <div className="min-h-screen flex w-full overflow-hidden">
+              <AppSidebar />
+              <div className="flex-1 flex flex-col w-full">
+                <header className="h-12 flex items-center border-b border-border bg-background sticky top-0 z-40">
+                  <SidebarTrigger className="ml-4" />
+                  <h1 className="ml-4 font-semibold text-foreground">Dashboard Personal Trainer</h1>
+                </header>
+                <main className="flex-1 overflow-auto">
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+              </div>
             </div>
-          </div>
         </SidebarProvider>
       </BrowserRouter>
     </TooltipProvider>
