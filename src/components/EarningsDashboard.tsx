@@ -1,6 +1,10 @@
+import { useState } from "react";
+import { format, isToday, isYesterday } from "date-fns";
+import { it } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import DateNavigation from "@/components/DateNavigation";
 import { 
   Euro, 
   TrendingUp, 
@@ -78,6 +82,7 @@ const EarningsDashboard = ({
   expiringSubscriptions,
   totalActiveClients
 }: EarningsDashboardProps) => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const urgentExpirations = expiringSubscriptions.filter(sub => sub.daysLeft <= 7);
   const potentialLoss = urgentExpirations.reduce((total, sub) => total + sub.monthlyValue, 0);
 
@@ -91,7 +96,7 @@ const EarningsDashboard = ({
               Benvenuto, {userName}! 👋
             </h1>
             <p className="text-white/90">
-              Ecco il resoconto della tua attività oggi
+              Ecco il resoconto della tua attività
             </p>
           </div>
           <div className="text-right">
@@ -101,6 +106,12 @@ const EarningsDashboard = ({
         </div>
       </div>
 
+      {/* Date Navigation */}
+      <DateNavigation 
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+      />
+
       {/* Earnings Overview */}
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center">
@@ -109,29 +120,31 @@ const EarningsDashboard = ({
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <EarningsCard
-            title="Oggi"
+            title={isToday(selectedDate) ? "Oggi" : 
+                  isYesterday(selectedDate) ? "Ieri" : 
+                  format(selectedDate, "d MMM yyyy", { locale: it })}
             amount={earnings.today}
             period="Entrate giornaliere"
             icon={Euro}
           />
           <EarningsCard
-            title="Questa Settimana"
+            title="Settimana"
             amount={earnings.thisWeek}
-            period="Ultimi 7 giorni"
+            period={`Settimana del ${format(selectedDate, "d MMM", { locale: it })}`}
             trend={earnings.trends.week}
             icon={TrendingUp}
           />
           <EarningsCard
-            title="Questo Mese"
+            title="Mese"
             amount={earnings.thisMonth}
-            period="Mese corrente"
+            period={format(selectedDate, "MMMM yyyy", { locale: it })}
             trend={earnings.trends.month}
             icon={Calendar}
           />
           <EarningsCard
-            title="Quest'Anno"
+            title="Anno"
             amount={earnings.thisYear}
-            period="Anno corrente"
+            period={format(selectedDate, "yyyy", { locale: it })}
             icon={Users}
           />
         </div>
