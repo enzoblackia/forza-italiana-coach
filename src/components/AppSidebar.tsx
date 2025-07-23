@@ -211,10 +211,7 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             className="w-full justify-start"
-            onClick={() => {
-              console.log('Profile button clicked, profile:', profile); // Debug log
-              setProfileDialogOpen(true);
-            }}
+            onClick={() => setProfileDialogOpen(true)}
           >
             <User className="h-4 w-4" />
             {!collapsed && <span className="ml-2">Modifica Profilo</span>}

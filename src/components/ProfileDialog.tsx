@@ -174,8 +174,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     }
   };
 
-  console.log('ProfileDialog - Profile data:', profile); // Debug log
-  console.log('ProfileDialog - Dialog open:', open); // Debug log
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
