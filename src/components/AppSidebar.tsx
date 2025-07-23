@@ -7,8 +7,11 @@ import {
   Settings,
   ShoppingCart,
   Phone,
-  Home
+  Home,
+  LogOut
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 import {
   Sidebar,
@@ -47,6 +50,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { signOut, profile, isAdmin } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
   const collapsed = state === "collapsed";
@@ -54,6 +58,10 @@ export function AppSidebar() {
     isActive 
       ? "bg-primary text-primary-foreground font-medium" 
       : "hover:bg-muted/50 transition-smooth !text-black dark:!text-white";
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <Sidebar
@@ -68,9 +76,17 @@ export function AppSidebar() {
               <Dumbbell className="w-5 h-5 text-white" />
             </div>
             {!collapsed && (
-              <span className="text-xl font-bold bg-fitness-gradient bg-clip-text text-transparent">
-                FitnessPro
-              </span>
+              <div className="flex-1">
+                <span className="text-xl font-bold bg-fitness-gradient bg-clip-text text-transparent">
+                  FitnessPro
+                </span>
+                {profile && (
+                  <p className="text-xs text-muted-foreground">
+                    {profile.first_name} {profile.last_name}
+                    {isAdmin && " (Admin)"}
+                  </p>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -132,24 +148,38 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Admin Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-600 text-sm font-medium uppercase tracking-wide">Amministrazione</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {adminItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* Admin Section - Only show if user is admin */}
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-gray-600 text-sm font-medium uppercase tracking-wide">Amministrazione</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink to={item.url} className={getNavCls}>
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Logout Section */}
+        <div className="mt-auto p-4 border-t border-border">
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4" />
+            {!collapsed && <span className="ml-2">Esci</span>}
+          </Button>
+        </div>
       </SidebarContent>
     </Sidebar>
   );

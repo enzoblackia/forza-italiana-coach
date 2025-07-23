@@ -1,10 +1,12 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AppSidebar } from "./components/AppSidebar";
 import Index from "./pages/Index";
 import Planning from "./pages/Planning";
 import Esercizi from "./pages/Esercizi";
@@ -14,45 +16,67 @@ import Nutrizionisti from "./pages/Nutrizionisti";
 import Staff from "./pages/Staff";
 import Impostazioni from "./pages/Impostazioni";
 import PortaleClienti from "./pages/PortaleClienti";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <SidebarProvider>
-            <div className="min-h-screen flex w-full overflow-hidden">
-              <AppSidebar />
-              <div className="flex-1 flex flex-col w-full">
-                <header className="h-12 flex items-center border-b border-border bg-background sticky top-0 z-40">
-                  <SidebarTrigger className="ml-4" />
-                  <h1 className="ml-4 font-semibold text-foreground">Dashboard Personal Trainer</h1>
-                </header>
-                <main className="flex-1 overflow-auto">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/planning" element={<Planning />} />
-                    <Route path="/esercizi" element={<Esercizi />} />
-                    <Route path="/nutrizione" element={<Nutrizione />} />
-                    <Route path="/portale-clienti" element={<PortaleClienti />} />
-                    <Route path="/shop" element={<Shop />} />
-                    <Route path="/nutrizionisti" element={<Nutrizionisti />} />
-                    <Route path="/staff" element={<Staff />} />
-                    <Route path="/impostazioni" element={<Impostazioni />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-              </div>
-            </div>
-        </SidebarProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+// AuthenticatedApp component to handle authenticated routes
+const AuthenticatedApp = () => {
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/planning" element={<Planning />} />
+            <Route path="/esercizi" element={<Esercizi />} />
+            <Route path="/nutrizione" element={<Nutrizione />} />
+            <Route path="/portale-clienti" element={<PortaleClienti />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/nutrizionisti" element={<Nutrizionisti />} />
+            <Route 
+              path="/staff" 
+              element={
+                <ProtectedRoute adminOnly>
+                  <Staff />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/impostazioni" element={<Impostazioni />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
+    </SidebarProvider>
+  );
+};
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route 
+                path="*" 
+                element={
+                  <ProtectedRoute>
+                    <AuthenticatedApp />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
