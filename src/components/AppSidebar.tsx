@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import {
   Sidebar,
@@ -69,12 +70,24 @@ export function AppSidebar() {
       collapsible="icon"
     >
       <SidebarContent className="bg-background border-r border-border">
-        {/* Logo */}
+        {/* Logo e Avatar */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center space-x-3">
+            {/* Avatar utente */}
+            {profile && (
+              <Avatar className="w-8 h-8">
+                <AvatarFallback className="bg-fitness-gradient text-white text-sm font-medium">
+                  {profile.first_name?.charAt(0) || ''}
+                  {profile.last_name?.charAt(0) || ''}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            
+            {/* Logo */}
             <div className="w-8 h-8 bg-fitness-gradient rounded-lg flex items-center justify-center">
               <Dumbbell className="w-5 h-5 text-white" />
             </div>
+            
             {!collapsed && (
               <div className="flex-1">
                 <span className="text-xl font-bold bg-fitness-gradient bg-clip-text text-transparent">

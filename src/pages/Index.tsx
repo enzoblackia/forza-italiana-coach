@@ -64,24 +64,6 @@ const mockExpiringSubscriptions = [
 const Index = () => {
   return (
     <div className="min-h-full bg-background">
-      
-      {/* Hero Section */}
-      <section className="bg-fitness-gradient text-white py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-3xl md:text-5xl font-bold mb-4">
-              Gestione Completa
-              <br />
-              <span className="text-white/90">Personal Training</span>
-            </h1>
-            <p className="text-lg text-white/80 max-w-2xl mx-auto">
-              La piattaforma professionale per gestire clienti, programmi di allenamento,
-              piani nutrizionali e il tuo team di personal trainer.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Earnings Dashboard */}
         <div className="mb-12">
