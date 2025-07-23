@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      exercises: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          difficulty_level: string | null
+          equipment: string | null
+          id: string
+          instructions: string | null
+          is_public: boolean | null
+          muscle_groups: string[] | null
+          name: string
+          reps: string | null
+          rest_time: number | null
+          sets: number | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          equipment?: string | null
+          id?: string
+          instructions?: string | null
+          is_public?: boolean | null
+          muscle_groups?: string[] | null
+          name: string
+          reps?: string | null
+          rest_time?: number | null
+          sets?: number | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          equipment?: string | null
+          id?: string
+          instructions?: string | null
+          is_public?: boolean | null
+          muscle_groups?: string[] | null
+          name?: string
+          reps?: string | null
+          rest_time?: number | null
+          sets?: number | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
