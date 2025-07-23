@@ -177,11 +177,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   console.log('ProfileDialog - Profile data:', profile); // Debug log
   console.log('ProfileDialog - Dialog open:', open); // Debug log
 
-  if (!profile) {
-    console.log('ProfileDialog - No profile found, rendering nothing');
-    return null;
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
