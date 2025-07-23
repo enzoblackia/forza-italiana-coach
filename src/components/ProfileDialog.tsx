@@ -21,7 +21,7 @@ interface ProfileDialogProps {
 }
 
 export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, refreshProfile, user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -59,13 +59,13 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !profile?.user_id) return;
+    if (!file || !user?.id) return;
 
     setAvatarLoading(true);
     try {
       // Upload file to Supabase Storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${profile.user_id}/avatar.${fileExt}`;
+      const fileName = `${user.id}/avatar.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -78,11 +78,18 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      // Update profile with new avatar URL
+      // Update or create profile with new avatar URL
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('user_id', profile.user_id);
+        .upsert({ 
+          user_id: user.id,
+          avatar_url: publicUrl,
+          first_name: formData.firstName || null,
+          last_name: formData.lastName || null,
+          phone: formData.phone || null,
+          date_of_birth: formData.dateOfBirth || null
+        })
+        .eq('user_id', user.id);
 
       if (updateError) throw updateError;
 
@@ -104,20 +111,21 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   };
 
   const handleProfileUpdate = async () => {
-    if (!profile?.user_id) return;
+    if (!user?.id) return;
 
     setLoading(true);
     try {
-      // Update profile data
+      // Update or create profile data
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
+        .upsert({
+          user_id: user.id,
+          first_name: formData.firstName || null,
+          last_name: formData.lastName || null,
+          phone: formData.phone || null,
           date_of_birth: formData.dateOfBirth || null,
         })
-        .eq('user_id', profile.user_id);
+        .eq('user_id', user.id);
 
       if (profileError) throw profileError;
 
@@ -203,7 +211,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   accept="image/*"
                   onChange={handleAvatarUpload}
                   className="hidden"
-                  disabled={avatarLoading || !profile}
+                  disabled={avatarLoading}
                 />
               </label>
             </div>
