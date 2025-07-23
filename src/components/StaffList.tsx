@@ -31,6 +31,7 @@ interface Staff {
   department: string;
   hire_date: string;
   status: string;
+  temp_email?: string;
   profiles: {
     first_name: string | null;
     last_name: string | null;
@@ -64,11 +65,13 @@ export const StaffList = ({ onEdit, onSchedule, onAdd, refreshTrigger }: StaffLi
           hire_date,
           status,
           user_id,
-          profiles(first_name, last_name, phone)
+          temp_email,
+          profiles!left(first_name, last_name, phone)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Staff data:', data); // Debug log
       setStaff((data as any) || []);
       setFilteredStaff((data as any) || []);
     } catch (error) {
@@ -91,6 +94,7 @@ export const StaffList = ({ onEdit, onSchedule, onAdd, refreshTrigger }: StaffLi
     const filtered = staff.filter(member => 
       member.profiles?.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.profiles?.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      member.temp_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.employee_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.department.toLowerCase().includes(searchQuery.toLowerCase())
@@ -173,18 +177,27 @@ export const StaffList = ({ onEdit, onSchedule, onAdd, refreshTrigger }: StaffLi
                     <div className="flex items-center gap-3">
                       <Avatar>
                         <AvatarFallback>
-                          {member.profiles?.first_name?.charAt(0) || ''}
+                          {member.profiles?.first_name?.charAt(0) || member.temp_email?.charAt(0)?.toUpperCase() || 'U'}
                           {member.profiles?.last_name?.charAt(0) || ''}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="font-medium">
-                          {member.profiles?.first_name} {member.profiles?.last_name}
+                          {member.profiles?.first_name && member.profiles?.last_name 
+                            ? `${member.profiles.first_name} ${member.profiles.last_name}`
+                            : member.temp_email || 'Nome non disponibile'
+                          }
                         </div>
                         {member.profiles?.phone && (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <Phone className="h-3 w-3" />
                             {member.profiles.phone}
+                          </div>
+                        )}
+                        {member.temp_email && !member.profiles && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Mail className="h-3 w-3" />
+                            {member.temp_email}
                           </div>
                         )}
                       </div>
