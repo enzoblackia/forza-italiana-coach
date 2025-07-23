@@ -7,19 +7,20 @@ import { EditableField } from "./EditableField";
 import { useToast } from "@/hooks/use-toast";
 
 interface Client {
-  id: number;
-  name: string;
+  id: string;
+  first_name: string;
+  last_name: string;
   email: string;
   status: string;
   plan: string;
-  nextSession: string;
-  progress: number;
+  phone?: string;
+  notes?: string;
 }
 
 interface ClientRowProps {
   client: Client;
-  onUpdate: (id: number, updates: Partial<Client>) => void;
-  onDelete: (id: number) => void;
+  onUpdate: (id: string, updates: Partial<Client>) => void;
+  onDelete: (id: string) => void;
 }
 
 export const ClientRow = ({ client, onUpdate, onDelete }: ClientRowProps) => {
@@ -30,19 +31,10 @@ export const ClientRow = ({ client, onUpdate, onDelete }: ClientRowProps) => {
 
   const handleUpdate = (field: keyof Client, value: string) => {
     onUpdate(client.id, { [field]: value });
-    toast({
-      title: "Cliente aggiornato",
-      description: `${field} modificato con successo`,
-    });
   };
 
   const handleDelete = () => {
     onDelete(client.id);
-    toast({
-      title: "Cliente rimosso",
-      description: "Il cliente è stato rimosso dal sistema",
-      variant: "destructive",
-    });
   };
 
   const getStatusBadge = (status: string) => {
@@ -82,12 +74,20 @@ export const ClientRow = ({ client, onUpdate, onDelete }: ClientRowProps) => {
           <Users className="h-5 w-5 text-primary" />
         </div>
         <div className="space-y-1">
-          <EditableField
-            value={client.name}
-            onSave={(value) => handleUpdate('name', value)}
-            placeholder="Nome cliente"
-            className="font-medium"
-          />
+          <div className="flex space-x-2">
+            <EditableField
+              value={client.first_name}
+              onSave={(value) => handleUpdate('first_name', value)}
+              placeholder="Nome"
+              className="font-medium"
+            />
+            <EditableField
+              value={client.last_name}
+              onSave={(value) => handleUpdate('last_name', value)}
+              placeholder="Cognome"
+              className="font-medium"
+            />
+          </div>
           <EditableField
             value={client.email}
             onSave={(value) => handleUpdate('email', value)}
@@ -123,17 +123,14 @@ export const ClientRow = ({ client, onUpdate, onDelete }: ClientRowProps) => {
           </div>
         </div>
         
-        <div className="text-center min-w-[140px]">
-          <p className="text-sm font-medium">Prossima Sessione</p>
-          <p className="text-sm text-muted-foreground">{client.nextSession}</p>
-        </div>
-        
-        <div className="text-center min-w-[80px]">
-          <p className="text-sm font-medium">Progresso</p>
-          <div className="flex items-center justify-center space-x-2">
-            <Activity className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">{client.progress}%</span>
-          </div>
+        <div className="text-center min-w-[100px]">
+          <p className="text-sm font-medium">Telefono</p>
+          <EditableField
+            value={client.phone || ""}
+            onSave={(value) => handleUpdate('phone', value)}
+            placeholder="Telefono"
+            className="text-sm text-muted-foreground"
+          />
         </div>
         
         <div className="flex items-center space-x-2">
@@ -152,7 +149,7 @@ export const ClientRow = ({ client, onUpdate, onDelete }: ClientRowProps) => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Rimuovi Cliente</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Sei sicuro di voler rimuovere {client.name} dal sistema? Questa azione non può essere annullata.
+                  Sei sicuro di voler rimuovere {client.first_name} {client.last_name} dal sistema? Questa azione non può essere annullata.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

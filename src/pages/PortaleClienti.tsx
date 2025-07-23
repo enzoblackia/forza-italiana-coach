@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,63 +6,104 @@ import { Users, Calendar, CreditCard, MessageSquare, Activity, Settings, Plus } 
 import { ClientRow } from "@/components/ClientRow";
 import { AddClientDialog } from "@/components/AddClientDialog";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Client {
-  id: number;
-  name: string;
+  id: string;
+  first_name: string;
+  last_name: string;
   email: string;
   status: string;
   plan: string;
-  nextSession: string;
-  progress: number;
+  phone?: string;
+  notes?: string;
 }
 
 export default function PortaleClienti() {
   const { toast } = useToast();
-  
-  const [clients, setClients] = useState<Client[]>([
-    {
-      id: 1,
-      name: "Marco Rossi",
-      email: "marco.rossi@email.com",
-      status: "Attivo",
-      plan: "Premium",
-      nextSession: "2024-01-25 10:00",
-      progress: 85
-    },
-    {
-      id: 2,
-      name: "Laura Bianchi",
-      email: "laura.bianchi@email.com",
-      status: "Attivo",
-      plan: "Standard",
-      nextSession: "2024-01-24 15:30",
-      progress: 72
-    },
-    {
-      id: 3,
-      name: "Giuseppe Verdi",
-      email: "giuseppe.verdi@email.com",
-      status: "In scadenza",
-      plan: "Basic",
-      nextSession: "2024-01-26 09:00",
-      progress: 45
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const fetchClients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setClients(data || []);
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile caricare i clienti",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  ]);
-
-  const handleClientUpdate = (id: number, updates: Partial<Client>) => {
-    setClients(prev => prev.map(client => 
-      client.id === id ? { ...client, ...updates } : client
-    ));
   };
 
-  const handleClientDelete = (id: number) => {
-    setClients(prev => prev.filter(client => client.id !== id));
+  const handleClientUpdate = async (id: string, updates: Partial<Client>) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setClients(prev => prev.map(client => 
+        client.id === id ? { ...client, ...updates } : client
+      ));
+
+      toast({
+        title: "Cliente aggiornato",
+        description: "Le modifiche sono state salvate",
+      });
+    } catch (error) {
+      console.error('Error updating client:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile aggiornare il cliente",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleAddClient = (newClient: Omit<Client, 'id'>) => {
-    const newId = Math.max(...clients.map(c => c.id), 0) + 1;
-    setClients(prev => [...prev, { ...newClient, id: newId }]);
+  const handleClientDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setClients(prev => prev.filter(client => client.id !== id));
+
+      toast({
+        title: "Cliente rimosso",
+        description: "Il cliente è stato rimosso dal sistema",
+        variant: "destructive",
+      });
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile rimuovere il cliente",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddClient = (newClient: Client) => {
+    setClients(prev => [newClient, ...prev]);
   };
 
   const activeClients = clients.filter(client => client.status === "Attivo").length;
@@ -137,7 +178,11 @@ export default function PortaleClienti() {
           </div>
         </CardHeader>
         <CardContent>
-          {clients.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Caricamento clienti...
+            </div>
+          ) : clients.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               Nessun cliente trovato
             </div>

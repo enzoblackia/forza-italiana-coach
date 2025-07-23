@@ -9,17 +9,18 @@ import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Client {
-  id: number;
-  name: string;
+  id: string;
+  first_name: string;
+  last_name: string;
   email: string;
   status: string;
   plan: string;
-  nextSession: string;
-  progress: number;
+  phone?: string;
+  notes?: string;
 }
 
 interface AddClientDialogProps {
-  onAddClient: (client: Omit<Client, 'id'>) => void;
+  onAddClient: (client: Client) => void;
   trigger?: React.ReactNode;
 }
 
@@ -29,11 +30,13 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    name: "",
+    first_name: "",
+    last_name: "",
     email: "",
     password: "",
     status: "Attivo",
     plan: "Basic",
+    phone: "",
   });
 
   const statusOptions = ["Attivo", "In scadenza", "Sospeso", "Inattivo"];
@@ -45,10 +48,10 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
 
     try {
       // Validate required fields
-      if (!formData.name.trim() || !formData.email.trim() || !formData.password.trim()) {
+      if (!formData.first_name.trim() || !formData.last_name.trim() || !formData.email.trim() || !formData.password.trim()) {
         toast({
           title: "Errore",
-          description: "Nome, email e password sono obbligatori",
+          description: "Nome, cognome, email e password sono obbligatori",
           variant: "destructive",
         });
         return;
@@ -81,8 +84,8 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
         password: formData.password,
         options: {
           data: {
-            first_name: formData.name.split(' ')[0] || formData.name,
-            last_name: formData.name.split(' ').slice(1).join(' ') || '',
+            first_name: formData.first_name,
+            last_name: formData.last_name,
           },
           emailRedirectTo: `${window.location.origin}/portale-clienti`,
         },
@@ -104,43 +107,56 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
           .from('profiles')
           .insert({
             user_id: authData.user.id,
-            first_name: formData.name.split(' ')[0] || formData.name,
-            last_name: formData.name.split(' ').slice(1).join(' ') || '',
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            phone: formData.phone,
           });
 
-        // Step 3: Assign 'client' role
+        // Step 3: Assign 'user' role (not client)
         await supabase
           .from('user_roles')
           .insert({
             user_id: authData.user.id,
-            role: 'client',
+            role: 'user',
           });
+
+        // Step 4: Create client record
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .insert({
+            user_id: authData.user.id,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            email: formData.email,
+            plan: formData.plan,
+            status: formData.status,
+            phone: formData.phone,
+          })
+          .select()
+          .single();
+
+        if (clientError) throw clientError;
+
+        // Add the client to local state (for immediate UI update)
+        onAddClient(clientData);
+
+        toast({
+          title: "Cliente registrato",
+          description: `${formData.first_name} ${formData.last_name} è stato registrato con successo`,
+        });
+
+        // Reset form and close dialog
+        setFormData({
+          first_name: "",
+          last_name: "",
+          email: "",
+          password: "",
+          status: "Attivo",
+          plan: "Basic",
+          phone: "",
+        });
+        setOpen(false);
       }
-
-      // Add the client to local state (for immediate UI update)
-      onAddClient({
-        name: formData.name,
-        email: formData.email,
-        status: formData.status,
-        plan: formData.plan,
-        nextSession: "Da programmare",
-        progress: 0,
-      });
-
-      toast({
-        title: "Cliente registrato",
-        description: `${formData.name} è stato registrato con successo come Cliente`,
-      });
-
-      // Reset form and close dialog
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        status: "Attivo",
-        plan: "Basic",
-      });
-      setOpen(false);
     } catch (error) {
       console.error('Error adding client:', error);
       toast({
@@ -170,15 +186,27 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
           <DialogTitle>Aggiungi Nuovo Cliente</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome Completo *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Mario Rossi"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="first_name">Nome *</Label>
+              <Input
+                id="first_name"
+                value={formData.first_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                placeholder="Mario"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="last_name">Cognome *</Label>
+              <Input
+                id="last_name"
+                value={formData.last_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                placeholder="Rossi"
+                required
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -207,6 +235,16 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
             <p className="text-xs text-muted-foreground">
               Il cliente potrà cambiarla in seguito dal suo profilo
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">Telefono</Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+              placeholder="+39 123 456 7890"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
