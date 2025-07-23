@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
 import {
   Calendar,
   Dumbbell,
@@ -8,11 +9,13 @@ import {
   ShoppingCart,
   Phone,
   Home,
-  LogOut
+  LogOut,
+  User
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProfileDialog } from "@/components/ProfileDialog";
 
 import {
   Sidebar,
@@ -52,6 +55,7 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const { signOut, profile, isAdmin } = useAuth();
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
   const isActive = (path: string) => currentPath === path;
   const collapsed = state === "collapsed";
@@ -76,6 +80,7 @@ export function AppSidebar() {
             {/* Avatar utente */}
             {profile && (
               <Avatar className="w-8 h-8">
+                <AvatarImage src={profile.avatar_url || ""} />
                 <AvatarFallback className="bg-fitness-gradient text-white text-sm font-medium">
                   {profile.first_name?.charAt(0) || ''}
                   {profile.last_name?.charAt(0) || ''}
@@ -182,8 +187,17 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Logout Section */}
-        <div className="mt-auto p-4 border-t border-border">
+        {/* User Actions Section */}
+        <div className="mt-auto p-4 border-t border-border space-y-2">
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => setProfileDialogOpen(true)}
+          >
+            <User className="h-4 w-4" />
+            {!collapsed && <span className="ml-2">Modifica Profilo</span>}
+          </Button>
+          
           <Button
             variant="ghost"
             className="w-full justify-start"
@@ -194,6 +208,12 @@ export function AppSidebar() {
           </Button>
         </div>
       </SidebarContent>
+
+      {/* Profile Dialog */}
+      <ProfileDialog 
+        open={profileDialogOpen} 
+        onOpenChange={setProfileDialogOpen} 
+      />
     </Sidebar>
   );
 }

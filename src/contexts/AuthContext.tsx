@@ -9,6 +9,7 @@ interface Profile {
   last_name: string | null;
   phone: string | null;
   date_of_birth: string | null;
+  avatar_url: string | null;
 }
 
 interface AuthContextType {
@@ -20,6 +21,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
+  refreshProfile: () => Promise<void>;
   isAdmin: boolean;
 }
 
@@ -32,6 +34,7 @@ const AuthContext = createContext<AuthContextType>({
   signUp: async () => ({ error: null }),
   signIn: async () => ({ error: null }),
   signOut: async () => ({ error: null }),
+  refreshProfile: async () => {},
   isAdmin: false,
 });
 
@@ -141,6 +144,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchUserProfile(user.id);
+    }
+  };
+
   const isAdmin = userRole === 'admin';
 
   const value = {
@@ -152,6 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signIn,
     signOut,
+    refreshProfile,
     isAdmin,
   };
 
