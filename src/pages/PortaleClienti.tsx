@@ -6,6 +6,7 @@ import { Users, Calendar, CreditCard, MessageSquare, Activity, Settings, Plus } 
 import { ClientRow } from "@/components/ClientRow";
 import { AddClientDialog } from "@/components/AddClientDialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Client {
@@ -21,6 +22,7 @@ interface Client {
 
 export default function PortaleClienti() {
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -111,72 +113,80 @@ export default function PortaleClienti() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Portale Clienti</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {isAdmin ? "Portale Clienti" : "Il Mio Account"}
+        </h1>
         <p className="text-muted-foreground">
-          Gestisci i tuoi clienti, monitora i progressi e mantieni la comunicazione
+          {isAdmin 
+            ? "Gestisci i tuoi clienti, monitora i progressi e mantieni la comunicazione" 
+            : "Visualizza le tue informazioni e gestisci il tuo profilo"
+          }
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clienti Attivi</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeClients}</div>
-            <p className="text-xs text-muted-foreground">+2 dal mese scorso</p>
-          </CardContent>
-        </Card>
+      {/* Stats Cards - Solo per Admin */}
+      {isAdmin && (
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Clienti Attivi</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{activeClients}</div>
+              <p className="text-xs text-muted-foreground">+2 dal mese scorso</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sessioni Oggi</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">6 completate</p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Sessioni Oggi</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">8</div>
+              <p className="text-xs text-muted-foreground">6 completate</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Messaggi</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-muted-foreground">Non letti</p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Messaggi</CardTitle>
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">5</div>
+              <p className="text-xs text-muted-foreground">Non letti</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fatturato Mese</CardTitle>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">€3,240</div>
-            <p className="text-xs text-muted-foreground">+12% dal mese scorso</p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Fatturato Mese</CardTitle>
+              <CreditCard className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">€3,240</div>
+              <p className="text-xs text-muted-foreground">+12% dal mese scorso</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-      {/* Client List */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Lista Clienti</CardTitle>
-              <CardDescription>
-                Clicca su qualsiasi campo per modificarlo rapidamente
-              </CardDescription>
+      {/* Client List - Solo per Admin */}
+      {isAdmin && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Lista Clienti</CardTitle>
+                <CardDescription>
+                  Clicca su qualsiasi campo per modificarlo rapidamente
+                </CardDescription>
+              </div>
+              <AddClientDialog onAddClient={handleAddClient} />
             </div>
-            <AddClientDialog onAddClient={handleAddClient} />
-          </div>
-        </CardHeader>
+          </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -200,44 +210,66 @@ export default function PortaleClienti() {
           )}
         </CardContent>
       </Card>
+      )}
 
-      {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <AddClientDialog 
-          onAddClient={handleAddClient}
-          trigger={
-            <Card className="cursor-pointer hover:shadow-md transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="h-5 w-5" />
-                  <span>Nuovo Cliente</span>
-                </CardTitle>
-                <CardDescription>Aggiungi un nuovo cliente al sistema</CardDescription>
-              </CardHeader>
-            </Card>
-          }
-        />
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+      {/* Sezione per Clienti Non-Admin */}
+      {!isAdmin && (
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5" />
-              <span>Programma Sessione</span>
-            </CardTitle>
-            <CardDescription>Pianifica una nuova sessione di allenamento</CardDescription>
+            <CardTitle>Il Tuo Profilo</CardTitle>
+            <CardDescription>
+              Visualizza e gestisci le tue informazioni personali
+            </CardDescription>
           </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-muted-foreground">
+              <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-medium mb-2">Benvenuto nel tuo portale!</h3>
+              <p>Qui potrai gestire il tuo profilo, visualizzare i tuoi progressi e comunicare con i tuoi trainer.</p>
+            </div>
+          </CardContent>
         </Card>
+      )}
 
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5" />
-              <span>Invia Messaggio</span>
-            </CardTitle>
-            <CardDescription>Comunica con i tuoi clienti</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
+      {/* Quick Actions - Solo per Admin */}
+      {isAdmin && (
+        <div className="grid gap-4 md:grid-cols-3">
+          <AddClientDialog 
+            onAddClient={handleAddClient}
+            trigger={
+              <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Users className="h-5 w-5" />
+                    <span>Nuovo Cliente</span>
+                  </CardTitle>
+                  <CardDescription>Aggiungi un nuovo cliente al sistema</CardDescription>
+                </CardHeader>
+              </Card>
+            }
+          />
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Calendar className="h-5 w-5" />
+                <span>Programma Sessione</span>
+              </CardTitle>
+              <CardDescription>Pianifica una nuova sessione di allenamento</CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <MessageSquare className="h-5 w-5" />
+                <span>Invia Messaggio</span>
+              </CardTitle>
+              <CardDescription>Comunica con i tuoi clienti</CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
