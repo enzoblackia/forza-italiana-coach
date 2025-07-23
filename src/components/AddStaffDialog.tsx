@@ -93,7 +93,7 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
           .from('user_roles')
           .insert({
             user_id: authData.user.id,
-            role: 'user',
+            role: 'client',
           });
 
         if (roleError) {
