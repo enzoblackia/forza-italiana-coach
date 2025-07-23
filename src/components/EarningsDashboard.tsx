@@ -88,23 +88,6 @@ const EarningsDashboard = ({
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-fitness-gradient rounded-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">
-              Benvenuto, {userName}! 👋
-            </h1>
-            <p className="text-white/90">
-              Ecco il resoconto della tua attività
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold">{totalActiveClients}</div>
-            <div className="text-white/80 text-sm">Clienti Attivi</div>
-          </div>
-        </div>
-      </div>
 
       {/* Date Navigation */}
       <DateNavigation 
