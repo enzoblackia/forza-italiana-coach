@@ -35,17 +35,6 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
     setLoading(true);
 
     try {
-      // First check if user already exists
-      const { data: existingUser } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (existingUser.user) {
-        // User exists, sign them out first
-        await supabase.auth.signOut();
-      }
-
       // Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -55,7 +44,7 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
             first_name: formData.first_name,
             last_name: formData.last_name,
           },
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/staff`,
         },
       });
 
