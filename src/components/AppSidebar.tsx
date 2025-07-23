@@ -36,9 +36,13 @@ const menuItems = [
   { title: "Planning", url: "/planning", icon: Calendar },
   { title: "Esercizi", url: "/esercizi", icon: Dumbbell },
   { title: "Nutrizione", url: "/nutrizione", icon: Apple },
-  { title: "Portale Clienti", url: "/portale-clienti", icon: Users },
   { title: "Risultati e Recensioni", url: "/risultati-recensioni", icon: Star },
   { title: "Pianificazione Obiettivi", url: "/pianificazione-obiettivi", icon: Target },
+];
+
+// Menu items solo per admin
+const adminMenuItems = [
+  { title: "Portale Clienti", url: "/portale-clienti", icon: Users },
   { title: "Gestione Staff", url: "/staff", icon: Users },
 ];
 
@@ -119,6 +123,17 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} end className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              {/* Menu items solo per admin */}
+              {isAdmin && adminMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
