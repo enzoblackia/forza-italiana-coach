@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,22 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     newPassword: "",
     confirmPassword: "",
   });
+
+  // Update form data when profile changes
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        firstName: profile.first_name || "",
+        lastName: profile.last_name || "",
+        phone: profile.phone || "",
+        dateOfBirth: profile.date_of_birth || "",
+        email: "",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    }
+  }, [profile]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -158,7 +174,13 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     }
   };
 
-  if (!profile) return null;
+  console.log('ProfileDialog - Profile data:', profile); // Debug log
+  console.log('ProfileDialog - Dialog open:', open); // Debug log
+
+  if (!profile) {
+    console.log('ProfileDialog - No profile found, rendering nothing');
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
