@@ -47,6 +47,106 @@ export type Database = {
         }
         Relationships: []
       }
+      staff: {
+        Row: {
+          created_at: string
+          department: string
+          employee_id: string
+          hire_date: string
+          id: string
+          manager_id: string | null
+          notes: string | null
+          position: string
+          salary: number | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department: string
+          employee_id: string
+          hire_date: string
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          position: string
+          salary?: number | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          employee_id?: string
+          hire_date?: string
+          id?: string
+          manager_id?: string | null
+          notes?: string | null
+          position?: string
+          salary?: number | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_logs: {
+        Row: {
+          break_duration: number | null
+          clock_in: string
+          clock_out: string | null
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          staff_id: string
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          break_duration?: number | null
+          clock_in: string
+          clock_out?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string | null
+          staff_id: string
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          break_duration?: number | null
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          staff_id?: string
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_logs_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -67,6 +167,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      work_schedules: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_working_day: boolean | null
+          staff_id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_working_day?: boolean | null
+          staff_id: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_working_day?: boolean | null
+          staff_id?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_schedules_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

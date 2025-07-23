@@ -1,7 +1,96 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserPlus, Clock, Award } from "lucide-react";
+import { StaffList } from "@/components/StaffList";
+import { AddStaffDialog } from "@/components/AddStaffDialog";
+import { ScheduleDialog } from "@/components/ScheduleDialog";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Staff {
+  id: string;
+  employee_id: string;
+  position: string;
+  department: string;
+  hire_date: string;
+  status: string;
+  profiles: {
+    first_name: string | null;
+    last_name: string | null;
+    phone: string | null;
+  } | null;
+}
 
 const Staff = () => {
+  const [staffStats, setStaffStats] = useState({
+    total: 0,
+    newHires: 0,
+    totalHours: 0,
+    performance: 92
+  });
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const fetchStats = async () => {
+    try {
+      // Get total staff count
+      const { count: totalCount } = await supabase
+        .from('staff')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Get new hires this month
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+      const { count: newHiresCount } = await supabase
+        .from('staff')
+        .select('*', { count: 'exact', head: true })
+        .gte('hire_date', `${currentMonth}-01`)
+        .eq('status', 'active');
+
+      // Get total hours this week (placeholder calculation)
+      const startOfWeek = new Date();
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+      const { data: timeLogs } = await supabase
+        .from('time_logs')
+        .select('total_hours')
+        .gte('date', startOfWeek.toISOString().split('T')[0])
+        .lte('date', endOfWeek.toISOString().split('T')[0]);
+
+      const totalHours = timeLogs?.reduce((sum, log) => sum + (log.total_hours || 0), 0) || 0;
+
+      setStaffStats({
+        total: totalCount || 0,
+        newHires: newHiresCount || 0,
+        totalHours: Math.round(totalHours),
+        performance: 92 // Placeholder
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, [refreshTrigger]);
+
+  const handleEditStaff = (staff: Staff) => {
+    setSelectedStaff(staff);
+    // TODO: Implement edit functionality
+  };
+
+  const handleScheduleStaff = (staff: Staff) => {
+    setSelectedStaff(staff);
+    setShowScheduleDialog(true);
+  };
+
+  const handleSuccess = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -15,8 +104,8 @@ const Staff = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">2 trainer, 6 support</p>
+            <div className="text-2xl font-bold">{staffStats.total}</div>
+            <p className="text-xs text-muted-foreground">Membri attivi</p>
           </CardContent>
         </Card>
 
@@ -26,7 +115,7 @@ const Staff = () => {
             <UserPlus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{staffStats.newHires}</div>
             <p className="text-xs text-muted-foreground">Questo mese</p>
           </CardContent>
         </Card>
@@ -37,7 +126,7 @@ const Staff = () => {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">320h</div>
+            <div className="text-2xl font-bold">{staffStats.totalHours}h</div>
             <p className="text-xs text-muted-foreground">Questa settimana</p>
           </CardContent>
         </Card>
@@ -48,26 +137,30 @@ const Staff = () => {
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">92%</div>
+            <div className="text-2xl font-bold">{staffStats.performance}%</div>
             <p className="text-xs text-muted-foreground">Soddisfazione media</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Gestione Personale
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center text-muted-foreground py-8">
-            <p>Sistema gestione staff in sviluppo...</p>
-            <p className="text-sm mt-2">Qui sarà possibile gestire orari, paghe e performance</p>
-          </div>
-        </CardContent>
-      </Card>
+      <StaffList
+        onEdit={handleEditStaff}
+        onSchedule={handleScheduleStaff}
+        onAdd={() => setShowAddDialog(true)}
+        refreshTrigger={refreshTrigger}
+      />
+
+      <AddStaffDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onSuccess={handleSuccess}
+      />
+
+      <ScheduleDialog
+        open={showScheduleDialog}
+        onOpenChange={setShowScheduleDialog}
+        staff={selectedStaff}
+      />
     </div>
   );
 };
