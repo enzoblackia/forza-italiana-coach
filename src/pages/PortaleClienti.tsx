@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, Calendar, CreditCard, MessageSquare, Activity, Settings, Plus } from "lucide-react";
 import { ClientRow } from "@/components/ClientRow";
 import { AddClientDialog } from "@/components/AddClientDialog";
@@ -22,7 +23,7 @@ interface Client {
 
 export default function PortaleClienti() {
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -112,17 +113,42 @@ export default function PortaleClienti() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          {isAdmin ? "Portale Clienti" : "Il Mio Account"}
-        </h1>
-        <p className="text-muted-foreground">
-          {isAdmin 
-            ? "Gestisci i tuoi clienti, monitora i progressi e mantieni la comunicazione" 
-            : "Visualizza le tue informazioni e gestisci il tuo profilo"
-          }
-        </p>
-      </div>
+      {/* Header personalizzato per clienti */}
+      {!isAdmin && profile ? (
+        <div className="bg-gradient-to-r from-blue-500 to-green-500 rounded-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Avatar className="w-16 h-16 border-4 border-white/20">
+                <AvatarImage src={profile.avatar_url || ""} />
+                <AvatarFallback className="bg-white/20 text-white text-xl font-bold">
+                  {profile.first_name?.charAt(0) || ''}
+                  {profile.last_name?.charAt(0) || ''}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-3xl font-bold">
+                  Benvenuto, {profile.first_name}! 👋
+                </h1>
+                <p className="text-white/90 text-lg">
+                  Ecco il resoconto della tua attività
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isAdmin ? "Portale Clienti" : "Il Mio Account"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isAdmin 
+              ? "Gestisci i tuoi clienti, monitora i progressi e mantieni la comunicazione" 
+              : "Visualizza le tue informazioni e gestisci il tuo profilo"
+            }
+          </p>
+        </div>
+      )}
 
       {/* Stats Cards - Solo per Admin */}
       {isAdmin && (
@@ -214,21 +240,61 @@ export default function PortaleClienti() {
 
       {/* Sezione per Clienti Non-Admin */}
       {!isAdmin && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Il Tuo Profilo</CardTitle>
-            <CardDescription>
-              Visualizza e gestisci le tue informazioni personali
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-2">Benvenuto nel tuo portale!</h3>
-              <p>Qui potrai gestire il tuo profilo, visualizzare i tuoi progressi e comunicare con i tuoi trainer.</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                I Miei Progressi
+              </CardTitle>
+              <CardDescription>
+                Visualizza i tuoi risultati e obiettivi
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-4">
+                <div className="text-2xl font-bold text-primary">85%</div>
+                <p className="text-sm text-muted-foreground">Obiettivo raggiunto</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                Prossima Sessione
+              </CardTitle>
+              <CardDescription>
+                Il tuo prossimo allenamento
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-4">
+                <div className="text-lg font-semibold">Domani</div>
+                <p className="text-sm text-muted-foreground">ore 15:30</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                Messaggi
+              </CardTitle>
+              <CardDescription>
+                Comunicazioni dal tuo trainer
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-4">
+                <div className="text-2xl font-bold text-primary">3</div>
+                <p className="text-sm text-muted-foreground">Nuovi messaggi</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Quick Actions - Solo per Admin */}
