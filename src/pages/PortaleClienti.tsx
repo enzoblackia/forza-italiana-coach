@@ -113,8 +113,8 @@ export default function PortaleClienti() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header personalizzato per clienti */}
-      {!isAdmin && profile ? (
+      {/* Header personalizzato per tutti gli utenti */}
+      {profile ? (
         <div className="bg-gradient-to-r from-blue-500 to-green-500 rounded-lg p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -130,10 +130,20 @@ export default function PortaleClienti() {
                   Benvenuto, {profile.first_name}! 👋
                 </h1>
                 <p className="text-white/90 text-lg">
-                  Ecco il resoconto della tua attività
+                  {isAdmin 
+                    ? "Gestisci la tua palestra e monitora le attività" 
+                    : "Ecco il resoconto della tua attività"
+                  }
                 </p>
               </div>
             </div>
+            {/* Numero clienti attivi solo per admin */}
+            {isAdmin && (
+              <div className="text-right">
+                <div className="text-4xl font-bold">{activeClients}</div>
+                <p className="text-white/90">Clienti Attivi</p>
+              </div>
+            )}
           </div>
         </div>
       ) : (
