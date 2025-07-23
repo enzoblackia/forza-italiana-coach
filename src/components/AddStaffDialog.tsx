@@ -22,7 +22,6 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
     first_name: "",
     last_name: "",
     phone: "",
-    employee_id: "",
     position: "",
     department: "",
     hire_date: "",
@@ -115,12 +114,15 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
         }
       }
 
+      // Generate employee ID automatically
+      const { data: employeeIdData } = await supabase.rpc('generate_employee_id');
+      
       // Create staff record
       const { error: staffError } = await supabase
         .from('staff')
         .insert({
           user_id: authData.user.id,
-          employee_id: formData.employee_id,
+          employee_id: employeeIdData || `EMP${Date.now().toString().slice(-3)}`,
           position: formData.position,
           department: formData.department,
           hire_date: formData.hire_date,
@@ -142,7 +144,6 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
         first_name: "",
         last_name: "",
         phone: "",
-        employee_id: "",
         position: "",
         department: "",
         hire_date: "",
@@ -225,25 +226,14 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="employee_id">ID Dipendente *</Label>
-              <Input
-                id="employee_id"
-                value={formData.employee_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, employee_id: e.target.value }))}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="position">Posizione *</Label>
-              <Input
-                id="position"
-                value={formData.position}
-                onChange={(e) => setFormData(prev => ({ ...prev, position: e.target.value }))}
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="position">Posizione *</Label>
+            <Input
+              id="position"
+              value={formData.position}
+              onChange={(e) => setFormData(prev => ({ ...prev, position: e.target.value }))}
+              required
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

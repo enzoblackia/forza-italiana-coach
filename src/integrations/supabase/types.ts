@@ -108,7 +108,7 @@ export type Database = {
         Row: {
           created_at: string
           department: string
-          employee_id: string
+          employee_id: string | null
           hire_date: string
           id: string
           manager_id: string | null
@@ -122,7 +122,7 @@ export type Database = {
         Insert: {
           created_at?: string
           department: string
-          employee_id: string
+          employee_id?: string | null
           hire_date: string
           id?: string
           manager_id?: string | null
@@ -136,7 +136,7 @@ export type Database = {
         Update: {
           created_at?: string
           department?: string
-          employee_id?: string
+          employee_id?: string | null
           hire_date?: string
           id?: string
           manager_id?: string | null
@@ -271,6 +271,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_employee_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
