@@ -192,10 +192,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={profile.avatar_url || ""} />
+                <AvatarImage src={profile?.avatar_url || ""} />
                 <AvatarFallback className="bg-fitness-gradient text-white text-lg">
-                  {profile.first_name?.charAt(0) || ''}
-                  {profile.last_name?.charAt(0) || ''}
+                  {profile?.first_name?.charAt(0) || 'U'}
+                  {profile?.last_name?.charAt(0) || ''}
                 </AvatarFallback>
               </Avatar>
               <label className="absolute bottom-0 right-0 p-2 bg-primary rounded-full cursor-pointer hover:bg-primary/80 transition-colors">
@@ -205,7 +205,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   accept="image/*"
                   onChange={handleAvatarUpload}
                   className="hidden"
-                  disabled={avatarLoading}
+                  disabled={avatarLoading || !profile}
                 />
               </label>
             </div>
