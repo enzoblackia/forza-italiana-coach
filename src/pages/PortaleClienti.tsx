@@ -117,52 +117,18 @@ export default function PortaleClienti() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header personalizzato per tutti gli utenti */}
-      {profile ? (
-        <div className="bg-gradient-to-r from-blue-500 to-green-500 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Avatar className="w-16 h-16 border-4 border-white/20">
-                <AvatarImage src={profile.avatar_url || ""} />
-                <AvatarFallback className="bg-white/20 text-white text-xl font-bold">
-                  {profile.first_name?.charAt(0) || ''}
-                  {profile.last_name?.charAt(0) || ''}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-3xl font-bold">
-                  Benvenuto, {profile.first_name}! 👋
-                </h1>
-                <p className="text-white/90 text-lg">
-                  {isAdmin 
-                    ? "Gestisci la tua palestra e monitora le attività" 
-                    : "Ecco il resoconto della tua attività"
-                  }
-                </p>
-              </div>
-            </div>
-            {/* Numero clienti attivi solo per admin */}
-            {isAdmin && (
-              <div className="text-right">
-                <div className="text-4xl font-bold">{activeClients}</div>
-                <p className="text-white/90">Clienti Attivi</p>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {isAdmin ? "Portale Clienti" : "Il Mio Account"}
-          </h1>
-          <p className="text-muted-foreground">
-            {isAdmin 
-              ? "Gestisci i tuoi clienti, monitora i progressi e mantieni la comunicazione" 
-              : "Visualizza le tue informazioni e gestisci il tuo profilo"
-            }
-          </p>
-        </div>
-      )}
+      {/* Header della pagina */}
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">
+          {isAdmin ? "Portale Clienti" : "Il Mio Account"}
+        </h1>
+        <p className="text-muted-foreground">
+          {isAdmin 
+            ? "Gestisci i tuoi clienti, monitora i progressi e mantieni la comunicazione" 
+            : "Visualizza le tue informazioni e gestisci il tuo profilo"
+          }
+        </p>
+      </div>
 
       {/* Stats Cards - Solo per Admin */}
       {isAdmin && (
