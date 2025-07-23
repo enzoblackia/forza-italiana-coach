@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Client {
   id: number;
@@ -30,10 +31,9 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    password: "",
     status: "Attivo",
     plan: "Basic",
-    nextSession: "",
-    progress: 0,
   });
 
   const statusOptions = ["Attivo", "In scadenza", "Sospeso", "Inattivo"];
@@ -45,10 +45,10 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
 
     try {
       // Validate required fields
-      if (!formData.name.trim() || !formData.email.trim()) {
+      if (!formData.name.trim() || !formData.email.trim() || !formData.password.trim()) {
         toast({
           title: "Errore",
-          description: "Nome e email sono obbligatori",
+          description: "Nome, email e password sono obbligatori",
           variant: "destructive",
         });
         return;
@@ -65,43 +65,87 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
         return;
       }
 
-      // Format next session date
-      const nextSession = formData.nextSession 
-        ? new Date(formData.nextSession).toLocaleString('it-IT', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        : "Da programmare";
+      // Validate password length
+      if (formData.password.length < 6) {
+        toast({
+          title: "Errore",
+          description: "La password deve essere di almeno 6 caratteri",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      // Add the client
+      // Step 1: Create auth user for the client
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.name.split(' ')[0] || formData.name,
+            last_name: formData.name.split(' ').slice(1).join(' ') || '',
+          },
+          emailRedirectTo: `${window.location.origin}/portale-clienti`,
+        },
+      });
+
+      if (authError) {
+        console.error('Auth signup error:', authError);
+        toast({
+          title: "Errore di registrazione",
+          description: "Impossibile creare l'account. Verifica che l'email non sia già in uso.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (authData.user) {
+        // Step 2: Create profile manually
+        await supabase
+          .from('profiles')
+          .insert({
+            user_id: authData.user.id,
+            first_name: formData.name.split(' ')[0] || formData.name,
+            last_name: formData.name.split(' ').slice(1).join(' ') || '',
+          });
+
+        // Step 3: Assign 'client' role
+        await supabase
+          .from('user_roles')
+          .insert({
+            user_id: authData.user.id,
+            role: 'client',
+          });
+      }
+
+      // Add the client to local state (for immediate UI update)
       onAddClient({
-        ...formData,
-        nextSession,
-        progress: Number(formData.progress),
+        name: formData.name,
+        email: formData.email,
+        status: formData.status,
+        plan: formData.plan,
+        nextSession: "Da programmare",
+        progress: 0,
       });
 
       toast({
-        title: "Cliente aggiunto",
-        description: `${formData.name} è stato aggiunto con successo`,
+        title: "Cliente registrato",
+        description: `${formData.name} è stato registrato con successo come Cliente`,
       });
 
       // Reset form and close dialog
       setFormData({
         name: "",
         email: "",
+        password: "",
         status: "Attivo",
         plan: "Basic",
-        nextSession: "",
-        progress: 0,
       });
       setOpen(false);
     } catch (error) {
+      console.error('Error adding client:', error);
       toast({
         title: "Errore",
-        description: "Impossibile aggiungere il cliente",
+        description: "Impossibile registrare il cliente",
         variant: "destructive",
       });
     } finally {
@@ -149,6 +193,22 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="password">Password *</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+              placeholder="Minimo 6 caratteri"
+              required
+              minLength={6}
+            />
+            <p className="text-xs text-muted-foreground">
+              Il cliente potrà cambiarla in seguito dal suo profilo
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="plan">Piano</Label>
@@ -189,29 +249,6 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="nextSession">Prossima Sessione (opzionale)</Label>
-            <Input
-              id="nextSession"
-              type="datetime-local"
-              value={formData.nextSession}
-              onChange={(e) => setFormData(prev => ({ ...prev, nextSession: e.target.value }))}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="progress">Progresso (%)</Label>
-            <Input
-              id="progress"
-              type="number"
-              min="0"
-              max="100"
-              value={formData.progress}
-              onChange={(e) => setFormData(prev => ({ ...prev, progress: parseInt(e.target.value) || 0 }))}
-              placeholder="0"
-            />
-          </div>
-
           <div className="flex justify-end gap-2 pt-4">
             <Button 
               type="button" 
@@ -222,7 +259,7 @@ export const AddClientDialog = ({ onAddClient, trigger }: AddClientDialogProps) 
               Annulla
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Aggiunta..." : "Aggiungi Cliente"}
+              {loading ? "Registrazione..." : "Registra Cliente"}
             </Button>
           </div>
         </form>
