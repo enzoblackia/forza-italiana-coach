@@ -16,6 +16,8 @@ import Nutrizionisti from "./pages/Nutrizionisti";
 import Staff from "./pages/Staff";
 import Impostazioni from "./pages/Impostazioni";
 import PortaleClienti from "./pages/PortaleClienti";
+import RisultatiRecensioni from "./pages/RisultatiRecensioni";
+import PianificazioneObiettivi from "./pages/PianificazioneObiettivi";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +46,8 @@ const AuthenticatedApp = () => {
                 </ProtectedRoute>
               } 
             />
+            <Route path="/risultati-recensioni" element={<RisultatiRecensioni />} />
+            <Route path="/pianificazione-obiettivi" element={<PianificazioneObiettivi />} />
             <Route path="/impostazioni" element={<Impostazioni />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

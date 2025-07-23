@@ -64,7 +64,7 @@ export const StaffList = ({ onEdit, onSchedule, onAdd, refreshTrigger }: StaffLi
           hire_date,
           status,
           user_id,
-          profiles!staff_user_id_fkey(first_name, last_name, phone)
+          profiles(first_name, last_name, phone)
         `)
         .order('created_at', { ascending: false });
 

@@ -10,7 +10,9 @@ import {
   Phone,
   Home,
   LogOut,
-  User
+  User,
+  Star,
+  Target
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,8 @@ const menuItems = [
   { title: "Esercizi", url: "/esercizi", icon: Dumbbell },
   { title: "Nutrizione", url: "/nutrizione", icon: Apple },
   { title: "Portale Clienti", url: "/portale-clienti", icon: Users },
+  { title: "Risultati e Recensioni", url: "/risultati-recensioni", icon: Star },
+  { title: "Pianificazione Obiettivi", url: "/pianificazione-obiettivi", icon: Target },
   { title: "Gestione Staff", url: "/staff", icon: Users },
 ];
 
