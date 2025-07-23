@@ -111,6 +111,9 @@ export default function PortaleClienti() {
 
   const activeClients = clients.filter(client => client.status === "Attivo").length;
 
+  console.log('PortaleClienti - Profile data:', profile); // Debug log
+  console.log('PortaleClienti - First name:', profile?.first_name); // Debug log
+
   return (
     <div className="space-y-6 p-6">
       {/* Header personalizzato per tutti gli utenti */}
