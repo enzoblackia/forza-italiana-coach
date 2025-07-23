@@ -28,6 +28,7 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +60,25 @@ export default function Auth() {
     setIsLoading(true);
     setError(null);
 
+    // Validazione campi obbligatori
+    if (!firstName.trim()) {
+      setError("Il nome è obbligatorio");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!lastName.trim()) {
+      setError("Il cognome è obbligatorio");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!dateOfBirth) {
+      setError("La data di nascita è obbligatoria");
+      setIsLoading(false);
+      return;
+    }
+
     if (signupPassword !== confirmPassword) {
       setError("Le password non corrispondono");
       setIsLoading(false);
@@ -71,7 +91,7 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await signUp(signupEmail, signupPassword, firstName, lastName);
+    const { error } = await signUp(signupEmail, signupPassword, firstName, lastName, dateOfBirth);
     
     if (error) {
       setError(error.message);
@@ -155,26 +175,39 @@ export default function Auth() {
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="first-name">Nome</Label>
+                    <Label htmlFor="first-name">Nome *</Label>
                     <Input
                       id="first-name"
                       type="text"
                       placeholder="Mario"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
+                      required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="last-name">Cognome</Label>
+                    <Label htmlFor="last-name">Cognome *</Label>
                     <Input
                       id="last-name"
                       type="text"
                       placeholder="Rossi"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      required
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="date-of-birth">Data di Nascita *</Label>
+                  <Input
+                    id="date-of-birth"
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    required
+                  />
                 </div>
                 
                 <div className="space-y-2">
