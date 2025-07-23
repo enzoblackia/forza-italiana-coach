@@ -4,12 +4,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Calendar, CreditCard, MessageSquare, Activity, Settings, Plus } from "lucide-react";
 import { ClientRow } from "@/components/ClientRow";
+import { AddClientDialog } from "@/components/AddClientDialog";
 import { useToast } from "@/hooks/use-toast";
+
+interface Client {
+  id: number;
+  name: string;
+  email: string;
+  status: string;
+  plan: string;
+  nextSession: string;
+  progress: number;
+}
 
 export default function PortaleClienti() {
   const { toast } = useToast();
   
-  const [clients, setClients] = useState([
+  const [clients, setClients] = useState<Client[]>([
     {
       id: 1,
       name: "Marco Rossi",
@@ -39,7 +50,7 @@ export default function PortaleClienti() {
     }
   ]);
 
-  const handleClientUpdate = (id: number, updates: any) => {
+  const handleClientUpdate = (id: number, updates: Partial<Client>) => {
     setClients(prev => prev.map(client => 
       client.id === id ? { ...client, ...updates } : client
     ));
@@ -47,6 +58,11 @@ export default function PortaleClienti() {
 
   const handleClientDelete = (id: number) => {
     setClients(prev => prev.filter(client => client.id !== id));
+  };
+
+  const handleAddClient = (newClient: Omit<Client, 'id'>) => {
+    const newId = Math.max(...clients.map(c => c.id), 0) + 1;
+    setClients(prev => [...prev, { ...newClient, id: newId }]);
   };
 
   const activeClients = clients.filter(client => client.status === "Attivo").length;
@@ -117,10 +133,7 @@ export default function PortaleClienti() {
                 Clicca su qualsiasi campo per modificarlo rapidamente
               </CardDescription>
             </div>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Nuovo Cliente
-            </Button>
+            <AddClientDialog onAddClient={handleAddClient} />
           </div>
         </CardHeader>
         <CardContent>
@@ -145,15 +158,20 @@ export default function PortaleClienti() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Users className="h-5 w-5" />
-              <span>Nuovo Cliente</span>
-            </CardTitle>
-            <CardDescription>Aggiungi un nuovo cliente al sistema</CardDescription>
-          </CardHeader>
-        </Card>
+        <AddClientDialog 
+          onAddClient={handleAddClient}
+          trigger={
+            <Card className="cursor-pointer hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Users className="h-5 w-5" />
+                  <span>Nuovo Cliente</span>
+                </CardTitle>
+                <CardDescription>Aggiungi un nuovo cliente al sistema</CardDescription>
+              </CardHeader>
+            </Card>
+          }
+        />
 
         <Card className="cursor-pointer hover:shadow-md transition-shadow">
           <CardHeader>
