@@ -32,6 +32,7 @@ const menuItems = [
   { title: "Esercizi", url: "/esercizi", icon: Dumbbell },
   { title: "Nutrizione", url: "/nutrizione", icon: Apple },
   { title: "Portale Clienti", url: "/portale-clienti", icon: Users },
+  { title: "Gestione Staff", url: "/staff", icon: Users, adminOnly: true },
 ];
 
 const shopItems = [
@@ -43,7 +44,6 @@ const serviceItems = [
 ];
 
 const adminItems = [
-  { title: "Gestione Staff", url: "/staff", icon: Users },
   { title: "Impostazioni", url: "/impostazioni", icon: Settings },
 ];
 
@@ -109,7 +109,9 @@ export function AppSidebar() {
           <SidebarGroupLabel className="text-gray-600 text-sm font-medium uppercase tracking-wide">Principale</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
+              {menuItems
+                .filter((item) => !item.adminOnly || isAdmin)
+                .map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
