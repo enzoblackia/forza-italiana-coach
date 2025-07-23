@@ -22,8 +22,7 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
     first_name: "",
     last_name: "",
     phone: "",
-    position: "",
-    department: "",
+    position: "", // Will be "Admin" or "Cliente"
     hire_date: "",
     salary: "",
     notes: "",
@@ -88,12 +87,15 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
           console.error('Profile creation error:', profileCreateError);
         }
 
+        // Determine role based on position
+        const userRole = formData.position === 'Admin' ? 'admin' : 'client';
+        
         // Create user role manually if trigger failed
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({
             user_id: authData.user.id,
-            role: 'client',
+            role: userRole,
           });
 
         if (roleError) {
@@ -125,7 +127,6 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
           user_id: authData.user.id,
           employee_id: employeeIdData || `EMP${Date.now().toString().slice(-3)}`,
           position: formData.position,
-          department: formData.department,
           hire_date: formData.hire_date,
           salary: formData.salary ? parseFloat(formData.salary) : null,
           notes: formData.notes,
@@ -146,7 +147,6 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
         last_name: "",
         phone: "",
         position: "",
-        department: "",
         hire_date: "",
         salary: "",
         notes: "",
@@ -228,44 +228,30 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="position">Posizione *</Label>
-            <Input
-              id="position"
+            <Label htmlFor="position">Ruolo *</Label>
+            <Select
               value={formData.position}
-              onChange={(e) => setFormData(prev => ({ ...prev, position: e.target.value }))}
-              required
-            />
+              onValueChange={(value) => setFormData(prev => ({ ...prev, position: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleziona ruolo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Admin">Admin</SelectItem>
+                <SelectItem value="Cliente">Cliente</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="department">Dipartimento *</Label>
-              <Select
-                value={formData.department}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, department: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleziona dipartimento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fitness">Fitness</SelectItem>
-                  <SelectItem value="nutrition">Nutrizione</SelectItem>
-                  <SelectItem value="reception">Reception</SelectItem>
-                  <SelectItem value="management">Management</SelectItem>
-                  <SelectItem value="maintenance">Manutenzione</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="hire_date">Data Assunzione *</Label>
-              <Input
-                id="hire_date"
-                type="date"
-                value={formData.hire_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, hire_date: e.target.value }))}
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="hire_date">Data Assunzione *</Label>
+            <Input
+              id="hire_date"
+              type="date"
+              value={formData.hire_date}
+              onChange={(e) => setFormData(prev => ({ ...prev, hire_date: e.target.value }))}
+              required
+            />
           </div>
 
           <div className="space-y-2">
