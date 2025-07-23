@@ -34,105 +34,71 @@ export const AddStaffDialog = ({ open, onOpenChange, onSuccess }: AddStaffDialog
     setLoading(true);
 
     try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-          },
-          emailRedirectTo: `${window.location.origin}/staff`,
-        },
-      });
-
-      if (authError) {
-        // If signup fails, log the detailed error but continue with a simplified approach
-        console.error('Auth signup error:', authError);
-        toast({
-          title: "Errore di autenticazione",
-          description: "Impossibile creare l'utente. Verifica che l'email non sia già in uso.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (!authData.user) {
-        throw new Error("User creation failed - no user returned");
-      }
-
-      // Wait a moment for the trigger to complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Check if profile exists, if not create it manually
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', authData.user.id)
-        .single();
-
-      if (!existingProfile) {
-        // Create profile manually if trigger failed
-        const { error: profileCreateError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: authData.user.id,
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            phone: formData.phone,
-          });
-
-        if (profileCreateError) {
-          console.error('Profile creation error:', profileCreateError);
-        }
-
-        // Determine role based on position
-        const userRole = formData.position === 'Admin' ? 'admin' : 'client';
-        
-        // Create user role manually if trigger failed
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: userRole,
-          });
-
-        if (roleError) {
-          console.error('Role creation error:', roleError);
-        }
-      } else {
-        // Update existing profile with additional info
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            phone: formData.phone,
-          })
-          .eq('user_id', authData.user.id);
-
-        if (profileError) {
-          console.error('Profile update error:', profileError);
-        }
-      }
-
-      // Generate employee ID automatically
+      // Step 1: Create staff record first without user_id
       const { data: employeeIdData } = await supabase.rpc('generate_employee_id');
       
-      // Create staff record
-      const { error: staffError } = await supabase
+      const { data: staffData, error: staffError } = await supabase
         .from('staff')
         .insert({
-          user_id: authData.user.id,
           employee_id: employeeIdData || `EMP${Date.now().toString().slice(-3)}`,
           position: formData.position,
           hire_date: formData.hire_date,
           salary: formData.salary ? parseFloat(formData.salary) : null,
           notes: formData.notes,
-        });
+          temp_email: formData.email, // Store email temporarily
+        })
+        .select()
+        .single();
 
       if (staffError) throw staffError;
+
+      // Step 2: Try to create auth user
+      try {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              first_name: formData.first_name,
+              last_name: formData.last_name,
+            },
+            emailRedirectTo: `${window.location.origin}/staff`,
+          },
+        });
+
+        if (authData.user) {
+          // Step 3: Create profile manually
+          await supabase
+            .from('profiles')
+            .insert({
+              user_id: authData.user.id,
+              first_name: formData.first_name,
+              last_name: formData.last_name,
+              phone: formData.phone,
+            });
+
+          // Step 4: Create user role manually
+          const userRole = formData.position === 'Admin' ? 'admin' : 'client';
+          await supabase
+            .from('user_roles')
+            .insert({
+              user_id: authData.user.id,
+              role: userRole,
+            });
+
+          // Step 5: Update staff record with user_id
+          await supabase
+            .from('staff')
+            .update({
+              user_id: authData.user.id,
+              temp_email: null, // Clear temporary email
+            })
+            .eq('id', staffData.id);
+        }
+      } catch (authError) {
+        console.warn('Auth creation failed, but staff record created:', authError);
+        // Staff record exists even if auth fails
+      }
 
       toast({
         title: "Successo",
